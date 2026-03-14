@@ -4,6 +4,8 @@ A professional, distraction-free countdown timer designed specifically for confe
 
 Built with a focus on high visibility and simplicity, this tool ensures your sessions stay on track without the clutter of ads or complex configurations.
 
+[**🚀 Live Demo**](https://sylphlin.github.io/conference-timer/)
+
 ![Conference Timer Preview](assets/screenshots/preview.png)
 
 ## Why Conference Timer?
