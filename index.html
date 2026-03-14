@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conference Timer</title>
+  <style>
+    :root {
+      --bg-black: #000000;
+      --text-white: #ffffff;
+      --text-yellow: #facc15;
+      --text-red: #ef4444;
+      --bar-green: #22c55e;
+      --bar-yellow: #eab308;
+      --bar-red: #dc2626;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-black);
+      color: var(--text-white);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+      transition: background-color 0.2s ease;
+    }
+
+    /* Timer Text Colors */
+    .timer-text.white { color: var(--text-white); }
+    .timer-text.yellow { color: var(--text-yellow); }
+    .timer-text.red { color: var(--text-red); }
+
+    /* Flashing Effect for Overtime: Text and Background flash once per second */
+    @keyframes flash-overtime {
+      0%, 49% { background-color: var(--text-red); color: var(--bg-black); }
+      50%, 100% { background-color: var(--bg-black); color: var(--text-red); }
+    }
+    .flash-mode {
+      animation: flash-overtime 1s step-end infinite;
+    }
+
+    #main-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 2rem;
+      position: relative;
+    }
+
+    #layout-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(2rem, 8vw, 6rem);
+      width: 100%;
+      max-width: 1600px;
+    }
+
+    /* Timer Display Area */
+    #display-wrapper {
+      position: relative;
+      cursor: pointer;
+      flex: 1;
+      text-align: center;
+      min-width: 0;
+    }
+
+    #timer-display {
+      font-size: clamp(4rem, 21vw, 40rem);
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.1;
+      display: inline-block;
+    }
+
+    #timer-input {
+      display: none;
+      background: transparent;
+      border: none;
+      color: var(--text-white);
+      font-size: clamp(4rem, 21vw, 40rem);
+      font-weight: 800;
+      font-family: inherit;
+      text-align: center;
+      width: 100%;
+      outline: none;
+    }
+
+    /* Side Controls */
+    .side-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      opacity: 0.15;
+      transition: opacity 0.3s ease;
+      min-width: clamp(60px, 10vw, 120px);
+    }
+
+    #main-container:hover .side-controls {
+      opacity: 1;
+    }
+
+    .side-controls button {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-white);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      width: clamp(60px, 10vh, 100px);
+      height: clamp(60px, 10vh, 100px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      padding: 0;
+    }
+
+    .side-controls button:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.1);
+      border-color: var(--text-white);
+    }
+
+    .side-controls button svg {
+      width: 50%;
+      height: 50%;
+      fill: currentColor;
+    }
+
+    #btn-reset {
+      display: none; /* Controlled by JS */
+    }
+
+    /* Progress Bar */
+    #progress-container {
+      height: 4vh;
+      min-height: 16px;
+      width: 100%;
+      position: relative;
+      display: flex;
+    }
+
+    .color-segment { height: 100%; transition: width 0.3s ease; }
+    .seg-green { background-color: var(--bar-green); width: 80%; }
+    .seg-yellow { background-color: var(--bar-yellow); width: 15%; }
+    .seg-red { background-color: var(--bar-red); width: 5%; }
+
+    #progress-mask {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      background-color: var(--bg-black);
+      width: 0%; 
+      transition: width 0.1s linear;
+    }
+
+    @media (max-width: 900px) {
+      #layout-wrapper {
+        flex-direction: column;
+        gap: 1rem;
+        padding-bottom: 2rem;
+      }
+      .side-controls {
+        flex-direction: row;
+        justify-content: center;
+        opacity: 0.3;
+        order: 2;
+      }
+      #display-wrapper {
+        order: 1;
+      }
+    }
+
+    @media (max-height: 500px) {
+      .side-controls { gap: 0.5rem; }
+      .side-controls button { width: 50px; height: 50px; }
+    }
+
+  </style>
+</head>
+<body>
+
+
+
+  <div id="main-container">
+    <div id="layout-wrapper">
+      <!-- Left Controls: - and + -->
+      <div class="side-controls">
+        <button onclick="timer.adjustTime(-1)" aria-label="Decrease Time" title="Decrease Time">
+          <svg viewBox="0 0 24 24"><path d="M19 13H5v-2h14v2z"/></svg>
+        </button>
+        <button onclick="timer.adjustTime(1)" aria-label="Increase Time" title="Increase Time">
+          <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+        </button>
+      </div>
+
+      <!-- Main Display -->
+      <div id="display-wrapper">
+        <div id="timer-display" class="timer-text white">10:00</div>
+        <input type="text" id="timer-input" placeholder="00:00" maxlength="5">
+      </div>
+
+      <!-- Right Controls: Start/Pause and Reset -->
+      <div class="side-controls">
+        <button id="btn-play-pause" onclick="timer.togglePlayPause()" aria-label="Start/Pause" title="Start/Pause">
+          <svg id="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          <svg id="icon-pause" viewBox="0 0 24 24" style="display:none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5z"/></svg>
+        </button>
+        <button id="btn-reset" onclick="timer.resetTimer()" aria-label="Reset" title="Reset">
+          <svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="progress-container">
+    <div class="color-segment seg-green"></div>
+    <div class="color-segment seg-yellow"></div>
+    <div class="color-segment seg-red"></div>
+    <div id="progress-mask"></div>
+  </div>
+
+  <script>
+
+    
+    class ConferenceTimer {
+      constructor() {
+        this.container = document.body;
+        this.display = document.getElementById('timer-display');
+        this.input = document.getElementById('timer-input');
+        this.mask = document.getElementById('progress-mask');
+        this.iconPlay = document.getElementById('icon-play');
+        this.iconPause = document.getElementById('icon-pause');
+        this.resetBtn = document.getElementById('btn-reset');
+        this.segGreen = document.querySelector('.seg-green');
+        this.segYellow = document.querySelector('.seg-yellow');
+        this.segRed = document.querySelector('.seg-red');
+
+        this.limitMs = (99 * 60 + 99) * 1000;
+        this.defaultDurationMs = 10 * 60 * 1000;
+        this.state = {
+          durationMs: this.defaultDurationMs,
+          targetTimeMs: null,
+          isPaused: true,
+          pausedRemainingMs: this.defaultDurationMs,
+          isDirty: false
+        };
+
+        this.init();
+      }
+
+      init() {
+        this.loadLocalStorage();
+        // parseUrlParams must come after loadLocalStorage so it can override it
+        this.parseUrlParams();
+        this.bindEvents();
+        this.updateUI();
+        this.animate();
+      }
+
+      loadLocalStorage() {
+        const saved = localStorage.getItem('conf-timer-v7');
+        if (saved) {
+          try { 
+            const parsed = JSON.parse(saved);
+            this.state = {...this.state, ...parsed}; 
+          } catch(e) {}
+        }
+      }
+
+      saveLocalStorage() {
+        localStorage.setItem('conf-timer-v7', JSON.stringify(this.state));
+      }
+
+      parseUrlParams() {
+        const params = new URLSearchParams(window.location.search);
+        const t = params.get('t');
+        if (t) {
+          const match = t.match(/(?:(\d+)m)?(?:(\d+)s)?/);
+          if (match) {
+            const mins = parseInt(match[1] || 0);
+            const secs = parseInt(match[2] || 0);
+            this.state.durationMs = Math.min(this.limitMs, (mins * 60 + secs) * 1000);
+            this.state.pausedRemainingMs = this.state.durationMs;
+            this.state.targetTimeMs = null;
+            this.state.isPaused = true;
+            this.state.isDirty = false;
+          }
+        } else {
+          // Force default if no param is present
+          this.state.durationMs = this.defaultDurationMs;
+          this.state.pausedRemainingMs = this.defaultDurationMs;
+          this.state.targetTimeMs = null;
+          this.state.isPaused = true;
+          this.state.isDirty = false;
+        }
+      }
+
+      bindEvents() {
+        this.display.onclick = (e) => this.enterEditMode(e);
+        this.input.onblur = () => this.exitEditMode();
+        this.input.onkeydown = (e) => {
+          if (e.key === 'Enter') this.exitEditMode();
+          if (e.key === 'Escape') {
+            this.input.value = this.formatInputTime(this.getRemaining());
+            this.input.blur();
+          }
+        };
+
+        window.onbeforeunload = () => this.saveLocalStorage();
+        window.addEventListener('keydown', (e) => {
+          if (e.key === ' ' && document.activeElement !== this.input) {
+            e.preventDefault();
+            this.togglePlayPause();
+          }
+        });
+      }
+
+      enterEditMode(e) {
+        if (!this.state.isPaused) this.togglePlayPause();
+        
+        const rect = this.display.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const width = rect.width;
+        
+        this.display.style.display = 'none';
+        this.input.style.display = 'block';
+        this.input.value = this.formatInputTime(this.getRemaining());
+        this.input.focus();
+
+        setTimeout(() => {
+          if (clickX < width * 0.45) {
+            this.input.setSelectionRange(0, 2);
+          } else {
+            this.input.setSelectionRange(3, 5);
+          }
+        }, 0);
+      }
+
+      exitEditMode() {
+        const val = this.input.value;
+        const match = val.match(/(\d+):(\d+)/) || val.match(/(\d\d)(\d\d)/);
+        if (match) {
+          const m = parseInt(match[1]);
+          const s = parseInt(match[2]);
+          this.state.durationMs = Math.min(this.limitMs, (m * 60 + s) * 1000);
+          this.state.pausedRemainingMs = this.state.durationMs;
+          this.state.targetTimeMs = null;
+          this.state.isDirty = true;
+        }
+        this.display.style.display = 'block';
+        this.input.style.display = 'none';
+        this.updateUI();
+      }
+
+      getRemaining() {
+        if (this.state.isPaused) return this.state.pausedRemainingMs;
+        const rem = this.state.targetTimeMs - Date.now();
+        return Math.max(-this.limitMs, rem);
+      }
+
+      adjustTime(mins) {
+        const delta = mins * 60 * 1000;
+        if (this.state.isPaused) {
+          this.state.pausedRemainingMs = Math.min(this.limitMs, Math.max(-this.limitMs, this.state.pausedRemainingMs + delta));
+          // Update the base duration so proportional blocks scale
+          this.state.durationMs = Math.max(1000, this.state.pausedRemainingMs);
+        } else {
+          this.state.targetTimeMs = Math.min(Date.now() + this.limitMs, this.state.targetTimeMs + delta);
+          // If running, we don't necessarily want to change the initial duration bar 
+          // but for consistency with user request "if total is 15m...", we update it.
+          this.state.durationMs = Math.max(1000, this.state.targetTimeMs - Date.now());
+        }
+        this.state.isDirty = true;
+        this.updateUI();
+      }
+
+      resetTimer() {
+        this.state.isPaused = true;
+        this.state.targetTimeMs = null;
+        this.state.pausedRemainingMs = this.state.durationMs;
+        this.state.isDirty = false;
+        this.updateUI();
+      }
+
+      togglePlayPause() {
+        if (this.state.isPaused) {
+          this.state.targetTimeMs = Date.now() + this.state.pausedRemainingMs;
+          this.state.isPaused = false;
+        } else {
+          this.state.pausedRemainingMs = this.getRemaining();
+          this.state.isPaused = true;
+        }
+        this.state.isDirty = true;
+        this.updateUI();
+      }
+
+      formatTime(ms) {
+        const isOvertime = ms < 0;
+        const absMs = Math.min(this.limitMs, Math.abs(ms));
+        const totalSecs = Math.floor(absMs / 1000);
+        let m = Math.floor(totalSecs / 60);
+        let s = totalSecs % 60;
+        if (m >= 100 || (m === 99 && s > 99)) { m = 99; s = 99; }
+        const prefix = isOvertime ? '+' : '';
+        return `${prefix}${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+      }
+
+      formatInputTime(ms) {
+        const absMs = Math.max(0, ms);
+        const totalSecs = Math.floor(absMs / 1000);
+        const m = Math.floor(totalSecs / 60);
+        const s = totalSecs % 60;
+        return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+      }
+
+      updateUI() {
+        const rem = this.getRemaining();
+        this.display.innerText = this.formatTime(rem);
+        
+        // Button Logic
+        this.iconPlay.style.display = this.state.isPaused ? 'block' : 'none';
+        this.iconPause.style.display = this.state.isPaused ? 'none' : 'block';
+        this.resetBtn.style.display = this.state.isDirty ? 'flex' : 'none';
+
+        const isOvertime = rem <= 0;
+        this.display.className = 'timer-text';
+        this.container.classList.remove('flash-mode');
+
+        if (isOvertime) {
+          this.display.classList.add('red');
+          if (!this.state.isPaused) this.container.classList.add('flash-mode');
+        } else if (rem < 15000) {
+          this.display.classList.add('red');
+        } else if (rem < 60000) {
+          this.display.classList.add('yellow');
+        } else {
+          this.display.classList.add('white');
+        }
+
+        const maskPct = Math.max(0, Math.min(100, (1 - Math.max(0, rem) / this.state.durationMs) * 100));
+        this.mask.style.width = maskPct + '%';
+
+        // Update proportional segments
+        const totalMs = this.state.durationMs;
+        const redWidth = Math.min(100, (15000 / totalMs) * 100);
+        const yellowWidth = Math.min(100 - redWidth, (45000 / totalMs) * 100);
+        const greenWidth = Math.max(0, 100 - redWidth - yellowWidth);
+
+        this.segRed.style.width = redWidth + '%';
+        this.segYellow.style.width = yellowWidth + '%';
+        this.segGreen.style.width = greenWidth + '%';
+      }
+
+      animate() {
+        if (!this.state.isPaused) this.updateUI();
+        requestAnimationFrame(() => this.animate());
+      }
+    }
+
+    const timer = new ConferenceTimer();
+  </script>
+</body>
+</html>
