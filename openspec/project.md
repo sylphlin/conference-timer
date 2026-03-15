@@ -26,8 +26,8 @@ A sleek, high-performance web application designed for conference speakers and o
   - **Timeout Indicator**: Dark Grey area indicating the zero point.
 - **Alert System**:
   - **Stages**: Start, Yellow, Red.
-  - **Sound Types**: N/A, Call Bell, Gong.
-  - **Repetition**: Alerts can repeat 1, 2, or 3 times.
+  - **Sound Types**: N/A, Bell (Service Desk style), Gong (Orchestral Strike).
+  - **Repetition**: Alerts can repeat 1, 2, or 3 times with intelligent spacing (0.8s for Bell, 4.5s for Gong).
 - **Overtime Behavior**:
   - Displays `+MM:SS` format.
   - Caps at `+99:99`.

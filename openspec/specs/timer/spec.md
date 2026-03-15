@@ -1,71 +1,80 @@
-## ADDED Requirements
+# Specification: Professional Conference Timer
 
-### Requirement: Single HTML Timer with URL Parsing
-The system MUST be a single `index.html` file that parses the `?t=` URL parameter.
+## 1. Core Architecture
 
-#### Scenario: User visits timer with URL parameter
-- **WHEN** the user visits `/?t=1m10s`
-- **THEN** the timer initializes to 1 minute and 10 seconds.
+### Requirement: Single-File Portability
+The system MUST be a single `index.html` file containing all HTML, CSS, and JavaScript. It must run in any modern web browser without an external server or dependencies.
 
-### Requirement: User-Defined Stages and Color Transitions
-The timer text color and the proportional bottom progress bar MUST update based on user-defined thresholds for three stages: **Start**, **Yellow**, and **Red**.
+### Requirement: URL-Based Initialization
+The system MUST parse the `?t=` URL parameter (e.g., `?t=15m30s`) to set the initial countdown duration.
 
-#### Scenario: Normal countdown (White)
-- **WHEN** time remaining is above the user-defined **Yellow** threshold
-- **THEN** timer text is White.
+#### Scenario: Deep linking to a specific duration
+- **WHEN** a user visits the application with `?t=10m`
+- **THEN** the timer initializes and displays `10:00` as the starting duration.
 
-#### Scenario: Warning countdown (Yellow)
-- **WHEN** time remaining is between the **Yellow** and **Red** thresholds
-- **THEN** timer text is Yellow.
+---
 
-#### Scenario: Critical countdown (Red)
-- **WHEN** time remaining is below the **Red** threshold
-- **THEN** timer text is Red.
+## 2. Visual Feedback & Display
 
-### Requirement: Max Time Limit
-The timer MUST NOT exceed 99:99 (5999 seconds).
+### Requirement: Proportional Progress Bar
+The application MUST display a tricolor bottom progress bar (Green, Yellow, Red) that segments dynamically based on user-defined thresholds.
+- **Green**: Remaining time above the Yellow threshold.
+- **Yellow**: Remaining time between the Yellow and Red thresholds.
+- **Red**: Remaining time below the Red threshold.
+- **Masking**: A dark mask MUST progress from left to right as time elapses, obscuring the color segments.
 
-#### Scenario: Adding time beyond limit
-- **WHEN** the user adds time causing the total to exceed 5999 seconds
-- **THEN** the time is capped at 99:99.
+### Requirement: High-Visibility Timer Text
+The timer digits MUST use a massive, high-contrast font that adapts to the screen size. The text color MUST transition in sync with the progress bar segments:
+- **White**: During the Green segment.
+- **Yellow**: During the Yellow segment.
+- **Red**: During the Red segment.
 
-### Requirement: End of Timer Effects
-When the timer hits zero, it MUST alert the user visually.
+---
 
-#### Scenario: Timer reaches zero
-- **WHEN** the countdown reaches `00:00`
-- **THEN** it switches to a `+MM:SS` format and the display flashes red (once per second).
+## 3. Interaction & Configuration
 
-### Requirement: Inline Editing
-The user MUST be able to click the timer digits to edit the time directly.
+### Requirement: Inline Time Editing
+The user MUST be able to click directly on the timer digits to edit the duration.
+- **Interaction**: Clicking triggers an input field.
+- **Validation**: Supports `MM:SS` format and caps duration at `99:99`.
 
-#### Scenario: Editing timer inline
-- **WHEN** the user clicks the timer text
-- **THEN** an input field appears allowing them to directly type a new time (e.g., `10:00`).
-
-### Requirement: Side Controls & Icons
-Buttons MUST be circular graphic icons with clear `alt` labels.
-- **Left Side**: `+` and `-`.
-- **Right Side**: `Start/Pause` and `Reset`.
-
-### Requirement: Reset Visibility
-The Reset button MUST be hidden (`display: none`) when the timer is in its initial state (at the start duration and not running).
-
-### Requirement: Stage-based Multi-Alert Settings
-The system MUST provide a settings interface to configure thresholds and audio alerts for multiple stages.
-- **Stages**: Start, Yellow, Red, Timeout.
-- **Configurable Thresholds**: Yellow and Red thresholds must be editable and validated (Red < Yellow).
-- **Audio Alerts**: Users can select from "Call Bell" or "Gong" synthesized sounds or "N/A" (mute).
-- **Repetition**: Alerts can be configured to repeat 1, 2, or 3 times.
-- **Testing**: A "Test" button MUST allow the user to preview the sound/repeat configuration for each stage.
-
-#### Scenario: Configuring alerts
-- **WHEN** the user selects "Gong" and "Repeat 2" for the Red stage and clicks "Test"
-- **THEN** the system synthesizes and plays two gong sounds in sequence.
+### Requirement: Professional Settings Modal
+A dedicated settings modal MUST be available via a gear icon to configure advanced behaviors:
+- **Thresholds**: Editable fields for "Yellow" and "Red" stage starts (validated such that Red < Yellow).
+- **Start Time**: Modifying the "Start" threshold updates the initial timer duration.
+- **Audio Profile**: Selectable sound types per stage.
 
 ### Requirement: Persistence
-The user's settings and current timer state MUST persist across browser sessions.
+All user configurations (thresholds, sounds, repeats) MUST be persisted in `localStorage`.
 
-#### Scenario: Reloading the page
-- **WHEN** the user reloads the page
-- **THEN** the custom thresholds and alert choices are restored from `localStorage`.
+---
+
+## 4. Audio Alert System
+
+### Requirement: Stage-Based Synthesized Alerts
+The system MUST trigger synthesized audio alerts at four specific stages: **Start**, **Yellow**, **Red**, and **Timeout**.
+
+### Requirement: Premium Sound Profiles
+Audio MUST be synthesized using the Web Audio API (no external files):
+- **Bell**: A crisp Service Desk style sound using additive synthesis (1100Hz base with harmonics).
+- **Gong**: A deep Orchestral Strike using a combination of impact noise, FM vibration, and low-frequency wash.
+
+### Requirement: Repetition & Spacing
+Alerts MUST support configurable repetition (1, 2, or 3 times) with intelligent spacing:
+- **Bell spacing**: 0.8 seconds.
+- **Gong spacing**: 4.5 seconds (to prevent chaotic overlap).
+
+---
+
+## 5. Exit Conditions & Limits
+
+### Requirement: Overtime Behavior
+When the timer reaches `00:00`, it MUST switch to an overtime mode.
+- **Display**: Shows `+MM:SS` count-up.
+- **Alert**: Triggers the "Timeout" stage alert.
+- **Visuals**: Displays a high-contrast flashing effect while the timer is running in overtime.
+
+### Requirement: Operating Limits
+- **Max Duration**: 99:99 (5999 seconds).
+- **Reset Logic**: The Reset button is only visible when the timer is "dirty" (time has elapsed or been edited).
+- **Fullscreen**: A dedicated toggle for distraction-free presentation.

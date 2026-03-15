@@ -11,7 +11,7 @@ Built with a focus on high visibility and simplicity, this tool ensures your ses
 ## Why Conference Timer?
 
 - **Stage-based Settings**: Configure four distinct stages (**Start**, **Yellow**, **Red**, **Timeout**) with custom thresholds.
-- **Advanced Alert Sounds**: Choice of synthesized **Call Bell** and **Gong** sounds using the Web Audio API.
+- **Advanced Alert Sounds**: Choice of professional synthesized sounds, including a crisp **Service Desk Bell** (additive synthesis) and a deep **Orchestral Gong** (FM/Impact synthesis).
 - **Customizable Repetitions**: Set alerts to repeat 1, 2, or 3 times for each stage.
 - **Visual Confidence**: Each stage in settings features a color-coded swatch matching the progress bar.
 - **Validation**: Built-in validation ensures logical timing (Red < Yellow).

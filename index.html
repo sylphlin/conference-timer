@@ -673,54 +673,89 @@
         this.initAudio();
         
         const now = this.audioCtx.currentTime;
+        const spacing = type === 'gong' ? 4.5 : 0.8;
         for (let i = 0; i < count; i++) {
-          const delay = i * 0.35;
+          const delay = i * spacing;
           if (type === 'bell') this.triggerBell(now + delay);
           if (type === 'gong') this.triggerGong(now + delay);
         }
       }
 
-      triggerBell(time) {
+      playTone(freq, type, duration, vol, time, dest) {
         const osc = this.audioCtx.createOscillator();
         const gain = this.audioCtx.createGain();
-
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(2500, time);
+        
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, time);
         
         gain.gain.setValueAtTime(0, time);
-        gain.gain.linearRampToValueAtTime(0.3, time + 0.01);
-        gain.gain.exponentialRampToValueAtTime(0.01, time + 0.3);
-
+        gain.gain.linearRampToValueAtTime(vol, time + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, time + duration);
+        
         osc.connect(gain);
-        gain.connect(this.audioCtx.destination);
-
+        gain.connect(dest);
+        
         osc.start(time);
-        osc.stop(time + 0.3);
+        osc.stop(time + duration);
+      }
+
+      playFM(cRatio, mRatio, modIndex, baseFreq, duration, vol, time, dest) {
+        const carrier = this.audioCtx.createOscillator();
+        const modulator = this.audioCtx.createOscillator();
+        const modGain = this.audioCtx.createGain();
+        const envGain = this.audioCtx.createGain();
+
+        modulator.frequency.setValueAtTime(baseFreq * mRatio, time);
+        modGain.gain.setValueAtTime(baseFreq * mRatio * modIndex, time);
+        modulator.connect(modGain);
+        modGain.connect(carrier.frequency);
+
+        carrier.frequency.setValueAtTime(baseFreq * cRatio, time);
+        carrier.type = 'sine';
+        modulator.type = 'sine';
+        
+        envGain.gain.setValueAtTime(0, time);
+        envGain.gain.linearRampToValueAtTime(vol, time + 0.02);
+        envGain.gain.exponentialRampToValueAtTime(0.001, time + duration);
+
+        carrier.connect(envGain);
+        envGain.connect(dest);
+
+        modulator.start(time);
+        carrier.start(time);
+        modulator.stop(time + duration);
+        carrier.stop(time + duration);
+      }
+
+      triggerBell(time) {
+        const master = this.audioCtx.createGain(); 
+        master.connect(this.audioCtx.destination); 
+        master.gain.setValueAtTime(1.0, time);
+        
+        const frequencies = [1100, 2200, 3100, 4800];
+        frequencies.forEach((freq, index) => {
+          const volume = 0.4 / (index + 1);
+          this.playTone(freq, 'sine', 1.5, volume, time, master);
+        });
       }
 
       triggerGong(time) {
-        // Multi-oscillator gong for complex metallic sound
-        const frequencies = [70, 112, 161, 230]; // Inharmonic
-        const masterGain = this.audioCtx.createGain();
-
-        frequencies.forEach((f, idx) => {
-          const osc = this.audioCtx.createOscillator();
-          const g = this.audioCtx.createGain();
-          
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(f, time);
-          
-          g.gain.setValueAtTime(0, time);
-          g.gain.linearRampToValueAtTime(0.2 / (idx + 1), time + 0.05);
-          g.gain.exponentialRampToValueAtTime(0.01, time + 3.0);
-          
-          osc.connect(g);
-          g.connect(masterGain);
-          osc.start(time);
-          osc.stop(time + 3.5);
+        const master = this.audioCtx.createGain(); 
+        master.connect(this.audioCtx.destination); 
+        master.gain.setValueAtTime(0.8, time);
+        
+        // 1. Impact
+        this.playTone(80, 'square', 0.5, 0.6, time, master); 
+        
+        // 2. FM vibration
+        this.playFM(1, 1.414, 2.5, 120, 4.0, 0.5, time, master);
+        
+        // 3. Low-frequency wash
+        const washFrequencies = [120, 210, 320];
+        washFrequencies.forEach((freq, index) => {
+          const volume = 0.3 / (index + 1);
+          this.playTone(freq, 'sine', 4.0, volume, time, master);
         });
-
-        masterGain.connect(this.audioCtx.destination);
       }
 
       loadLocalStorage() {
