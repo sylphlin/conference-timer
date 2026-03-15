@@ -17,15 +17,20 @@ A sleek, high-performance web application designed for conference speakers and o
 
 ## Domain Knowledge & Rules
 - **Visual Cues (Text)**:
-  - **White**: > 1 minute remaining.
-  - **Yellow**: 15 seconds - 1 minute remaining.
-  - **Red**: < 15 seconds remaining.
+  - **White**: Time remaining is above the user-defined **Yellow** threshold.
+  - **Yellow**: Time remaining is between **Yellow** and **Red** thresholds.
+  - **Red**: Time remaining is below the user-defined **Red** threshold.
 - **Visual Cues (Progress Bar)**:
   - **Thickness**: 4vh (high visibility).
-  - **Segments**: Proportional to total duration: Green (Remainder), Yellow (45s), Red (15s).
+  - **Segments**: Proportional to total duration: Green (Remainder), Yellow (Yellow - Red gap), Red (Red threshold).
+  - **Timeout Indicator**: Dark Grey area indicating the zero point.
+- **Alert System**:
+  - **Stages**: Start, Yellow, Red.
+  - **Sound Types**: N/A, Call Bell, Gong.
+  - **Repetition**: Alerts can repeat 1, 2, or 3 times.
 - **Overtime Behavior**:
   - Displays `+MM:SS` format.
   - Caps at `+99:99`.
-  - **Flashing**: 1Hz (once per second) red/black flash during active overtime.
-- **Persistence**: Remembers length and state, defaults to 10m on cold start (no URL params).
-- **URL Control**: Supports `?t=XmYs` for quick setup.
+  - **Flashing**: High-contrast flashing during active overtime.
+- **Persistence**: Settings (thresholds, sounds, repeats) are stored in `localStorage` under `conf-timer-v9`.
+- **URL Control**: Initial setup via `?t=XmYs`, which also sets the "Start" stage duration.

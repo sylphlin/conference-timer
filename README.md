@@ -10,23 +10,26 @@ Built with a focus on high visibility and simplicity, this tool ensures your ses
 
 ## Why Conference Timer?
 
-- **Stage-Ready Visibility**: Massive, high-contrast typography and a 4vh thickened progress bar that can be easily seen from the back of any hall.
+- **Stage-based Settings**: Configure four distinct stages (**Start**, **Yellow**, **Red**, **Timeout**) with custom thresholds.
+- **Advanced Alert Sounds**: Choice of synthesized **Call Bell** and **Gong** sounds using the Web Audio API.
+- **Customizable Repetitions**: Set alerts to repeat 1, 2, or 3 times for each stage.
+- **Visual Confidence**: Each stage in settings features a color-coded swatch matching the progress bar.
+- **Validation**: Built-in validation ensures logical timing (Red < Yellow).
 - **Zero Distractions**: No ads, no pop-ups, and no secondary functions. Purely focused on time.
 - **Privacy First**: Runs entirely in your browser. No data leaves your machine.
-- **Portable**: A single `index.html` file. No installation or internet connection required (after initial load).
+- **Portable**: A single `index.html` file. No installation required.
 
 ## Key Features
 
 - **Proportional Progress Bar**: A tricolor bar (Green-Yellow-Red) that dynamically scales to your total time.
-  - **Green**: Safe zone (> 1 minute).
-  - **Yellow**: Warning zone (15s to 1 minute).
-  - **Red**: Critical zone (< 15s).
-- **Overtime Mode**: Automatically switches to an elapsed time counter (`+MM:SS`) with a 1Hz red flash after reaching zero.
-- **Quick Setup (URL Params)**: Use `?t=XmYs` (e.g., `?t=15m30s`) to set the duration instantly via the URL.
-- **Direct Interaction**: 
+  - **Green**: Safe zone (> 1 minute by default).
+  - **Yellow**: Yellow zone (15s to 1 minute by default).
+  - **Red**: Red zone (< 15s by default).
+- **Overtime Mode**: Automatically switches to an elapsed time counter (`+MM:SS`) with a prominent flashing effect after reaching zero.
+- **Interactive Configuration**: 
   - Click digits to edit the time inline.
-  - Sidebar controls for quick adjustments (+/- 1 minute).
-  - One-click `Reset` to restore initial duration.
+  - Professional settings modal for multi-stage alerts.
+  - Sound testing buttons to preview configurations.
 - **Responsive Design**: Adapts perfectly to projectors, laptops, and mobile screens.
 
 ## Quick Start

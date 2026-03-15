@@ -7,19 +7,19 @@ The system MUST be a single `index.html` file that parses the `?t=` URL paramete
 - **WHEN** the user visits `/?t=1m10s`
 - **THEN** the timer initializes to 1 minute and 10 seconds.
 
-### Requirement: Progressive Masking and Color Transitions
-The timer text color and a static tricolor bottom progress bar MUST update based on remaining time.
+### Requirement: User-Defined Stages and Color Transitions
+The timer text color and the proportional bottom progress bar MUST update based on user-defined thresholds for three stages: **Start**, **Yellow**, and **Red**.
 
-#### Scenario: Normal countdown
-- **WHEN** time remaining is > 1 minute
+#### Scenario: Normal countdown (White)
+- **WHEN** time remaining is above the user-defined **Yellow** threshold
 - **THEN** timer text is White.
 
-#### Scenario: Warning Phase
-- **WHEN** time remaining is between 15 seconds and 1 minute
+#### Scenario: Warning countdown (Yellow)
+- **WHEN** time remaining is between the **Yellow** and **Red** thresholds
 - **THEN** timer text is Yellow.
 
-#### Scenario: Critical Phase
-- **WHEN** time remaining is < 15 seconds
+#### Scenario: Critical countdown (Red)
+- **WHEN** time remaining is below the **Red** threshold
 - **THEN** timer text is Red.
 
 ### Requirement: Max Time Limit
@@ -50,3 +50,22 @@ Buttons MUST be circular graphic icons with clear `alt` labels.
 
 ### Requirement: Reset Visibility
 The Reset button MUST be hidden (`display: none`) when the timer is in its initial state (at the start duration and not running).
+
+### Requirement: Stage-based Multi-Alert Settings
+The system MUST provide a settings interface to configure thresholds and audio alerts for multiple stages.
+- **Stages**: Start, Yellow, Red, Timeout.
+- **Configurable Thresholds**: Yellow and Red thresholds must be editable and validated (Red < Yellow).
+- **Audio Alerts**: Users can select from "Call Bell" or "Gong" synthesized sounds or "N/A" (mute).
+- **Repetition**: Alerts can be configured to repeat 1, 2, or 3 times.
+- **Testing**: A "Test" button MUST allow the user to preview the sound/repeat configuration for each stage.
+
+#### Scenario: Configuring alerts
+- **WHEN** the user selects "Gong" and "Repeat 2" for the Red stage and clicks "Test"
+- **THEN** the system synthesizes and plays two gong sounds in sequence.
+
+### Requirement: Persistence
+The user's settings and current timer state MUST persist across browser sessions.
+
+#### Scenario: Reloading the page
+- **WHEN** the user reloads the page
+- **THEN** the custom thresholds and alert choices are restored from `localStorage`.

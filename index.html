@@ -13,6 +13,10 @@
       --bar-green: #22c55e;
       --bar-yellow: #eab308;
       --bar-red: #dc2626;
+      --bar-grey: #333333;
+      --modal-bg: rgba(20, 20, 20, 0.95);
+      --input-bg: rgba(255, 255, 255, 0.05);
+      --input-error: rgba(239, 68, 68, 0.2);
     }
 
     * {
@@ -38,7 +42,7 @@
     .timer-text.yellow { color: var(--text-yellow); }
     .timer-text.red { color: var(--text-red); }
 
-    /* Flashing Effect for Overtime: Text and Background flash once per second */
+    /* UI Layout */
     @keyframes flash-overtime {
       0%, 49% { background-color: var(--text-red); color: var(--bg-black); }
       50%, 100% { background-color: var(--bg-black); color: var(--text-red); }
@@ -105,7 +109,8 @@
       min-width: clamp(60px, 10vw, 120px);
     }
 
-    #main-container:hover .side-controls {
+    body:hover .side-controls,
+    body:hover .top-right-controls {
       opacity: 1;
     }
 
@@ -181,6 +186,248 @@
       }
     }
 
+    /* Top Right Controls */
+    .top-right-controls {
+      position: absolute;
+      top: 2rem;
+      right: 2rem;
+      display: flex;
+      gap: 1rem;
+      opacity: 0.15;
+      transition: opacity 0.3s ease;
+      z-index: 100;
+    }
+
+    .top-right-controls button {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-white);
+      border: 1.5px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      width: clamp(28px, 4.5vh, 44px);
+      height: clamp(28px, 4.5vh, 44px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      padding: 0;
+    }
+
+    body:hover .top-right-controls button {
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .top-right-controls button:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.1);
+      border-color: var(--text-white);
+    }
+
+    .top-right-controls button svg {
+      width: 50%;
+      height: 50%;
+      fill: currentColor;
+    }
+
+    /* Settings Overlay */
+    #settings-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      animation: fade-in 0.3s ease;
+    }
+
+    @keyframes fade-in {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    #settings-modal {
+      background: var(--modal-bg);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 2rem;
+      padding: 2.5rem;
+      width: 95%;
+      max-width: 650px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    #settings-modal h2 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 2rem;
+      text-align: center;
+      letter-spacing: -0.02em;
+    }
+
+    .settings-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 2rem;
+    }
+
+    .settings-table th {
+      text-align: left;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: rgba(255, 255, 255, 0.4);
+      padding-bottom: 1rem;
+      font-weight: 600;
+    }
+
+    .settings-row {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .settings-row:last-child {
+      border-bottom: none;
+    }
+
+    .settings-row td {
+      padding: 0.75rem 0.25rem;
+      vertical-align: middle;
+    }
+
+    .stage-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+      white-space: nowrap;
+    }
+
+    .color-swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .swatch-start { background-color: var(--bar-green); }
+    .swatch-yellow { background-color: var(--bar-yellow); }
+    .swatch-red { background-color: var(--bar-red); }
+    .swatch-timeout { background-color: var(--bar-grey); }
+
+    .settings-table input[type="text"],
+    .settings-table select {
+      background: var(--input-bg);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 0.5rem;
+      padding: 0.5rem;
+      color: var(--text-white);
+      font-size: 0.9rem;
+      font-family: inherit;
+      outline: none;
+      width: 100%;
+      transition: all 0.2s;
+    }
+
+    .settings-table select {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='white' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: calc(100% - 8px) center;
+      padding-right: 24px;
+    }
+
+    .settings-table input[type="text"]:focus,
+    .settings-table select:focus {
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .settings-table input.error {
+      background-color: var(--input-error);
+      border-color: var(--text-red);
+    }
+
+    .btn-test {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-white);
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-test:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.1);
+    }
+
+    .btn-test:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .btn-test svg {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+    }
+
+    .modal-actions {
+      margin-top: 3rem;
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+    }
+
+    .btn-action {
+      padding: 1rem 2rem;
+      border-radius: 0.75rem;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s;
+      min-width: 120px;
+    }
+
+    .btn-save:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .validation-msg {
+      color: var(--text-red);
+      font-size: 0.8rem;
+      text-align: center;
+      margin-top: -1rem;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .btn-cancel {
+      background: transparent;
+      color: var(--text-white);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-action:hover {
+      transform: scale(1.05);
+    }
+
+    @media (max-width: 900px) {
+      .top-right-controls {
+        top: 1rem;
+        right: 1rem;
+      }
+    }
+
     @media (max-height: 500px) {
       .side-controls { gap: 0.5rem; }
       .side-controls button { width: 50px; height: 50px; }
@@ -191,6 +438,140 @@
 <body>
 
 
+
+  <div class="top-right-controls">
+    <button id="btn-settings" onclick="timer.openSettings()" aria-label="Settings" title="Settings">
+      <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+    </button>
+    <button id="btn-fullscreen" onclick="timer.toggleFullscreen()" aria-label="Fullscreen" title="Fullscreen">
+      <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+    </button>
+  </div>
+
+  <div id="settings-overlay">
+    <div id="settings-modal" onclick="event.stopPropagation()">
+      <h2>Settings</h2>
+      
+      <table class="settings-table">
+        <thead>
+          <tr>
+            <th>Stage</th>
+            <th style="width: 80px;">Time</th>
+            <th>Alert Sound</th>
+            <th style="width: 60px;">Repeat</th>
+            <th style="width: 40px;">Test</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Start Row -->
+          <tr class="settings-row">
+            <td>
+              <div class="stage-info">
+                <div class="color-swatch swatch-start"></div>
+                <span>Start</span>
+              </div>
+            </td>
+            <td><input type="text" id="setting-start-time" maxlength="5" placeholder="10:00"></td>
+            <td>
+              <select id="setting-start-sound" onchange="timer.updateSettingsUI()">
+                <option value="none">N/A</option>
+                <option value="bell">Call Bell</option>
+                <option value="gong">Gong</option>
+              </select>
+            </td>
+            <td>
+              <select id="setting-start-repeat">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+              </select>
+            </td>
+            <td>
+              <button class="btn-test" onclick="timer.testAlert('start')" aria-label="Test Sound">
+                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              </button>
+            </td>
+          </tr>
+          <!-- Yellow Row -->
+          <tr class="settings-row">
+            <td>
+              <div class="stage-info">
+                <div class="color-swatch swatch-yellow"></div>
+                <span>Yellow</span>
+              </div>
+            </td>
+            <td><input type="text" id="setting-yellow-time" maxlength="5" placeholder="01:00" oninput="timer.validateSettings()"></td>
+            <td>
+              <select id="setting-yellow-sound" onchange="timer.updateSettingsUI()">
+                <option value="none">N/A</option>
+                <option value="bell">Call Bell</option>
+                <option value="gong">Gong</option>
+              </select>
+            </td>
+            <td>
+              <select id="setting-yellow-repeat">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+              </select>
+            </td>
+            <td>
+              <button class="btn-test" onclick="timer.testAlert('yellow')" aria-label="Test Sound">
+                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              </button>
+            </td>
+          </tr>
+          <!-- Red Row -->
+          <tr class="settings-row">
+            <td>
+              <div class="stage-info">
+                <div class="color-swatch swatch-red"></div>
+                <span>Red</span>
+              </div>
+            </td>
+            <td><input type="text" id="setting-red-time" maxlength="5" placeholder="00:15" oninput="timer.validateSettings()"></td>
+            <td>
+              <select id="setting-red-sound" onchange="timer.updateSettingsUI()">
+                <option value="none">N/A</option>
+                <option value="bell">Call Bell</option>
+                <option value="gong">Gong</option>
+              </select>
+            </td>
+            <td>
+              <select id="setting-red-repeat">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+              </select>
+            </td>
+            <td>
+              <button class="btn-test" onclick="timer.testAlert('red')" aria-label="Test Sound">
+                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              </button>
+            </td>
+          </tr>
+          <!-- Timeout Row -->
+          <tr class="settings-row">
+            <td>
+              <div class="stage-info">
+                <div class="color-swatch swatch-timeout"></div>
+                <span>Timeout</span>
+              </div>
+            </td>
+            <td><div style="font-size: 0.9rem; color: rgba(255,255,255,0.4); padding-left: 0.5rem;">00:00</div></td>
+            <td colspan="3" style="text-align: center; color: rgba(255,255,255,0.2); font-size: 0.8rem; font-style: italic;">No sound options</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div id="validation-msg" class="validation-msg">Yellow must be greater than Red</div>
+
+      <div class="modal-actions">
+        <button class="btn-action btn-cancel" onclick="timer.closeSettings()">Cancel</button>
+        <button id="btn-save-settings" class="btn-action btn-save" onclick="timer.saveSettings()">Save</button>
+      </div>
+    </div>
+  </div>
 
   <div id="main-container">
     <div id="layout-wrapper">
@@ -253,8 +634,22 @@
           targetTimeMs: null,
           isPaused: true,
           pausedRemainingMs: this.defaultDurationMs,
-          isDirty: false
+          isDirty: false,
+          
+          yellowMs: 60000,
+          yellowSound: 'none',
+          yellowRepeat: 1,
+          
+          redMs: 15000,
+          redSound: 'none',
+          redRepeat: 1,
+          
+          startSound: 'none',
+          startRepeat: 1
         };
+
+        this.lastAlertStage = null; // null, 'yellow', 'red'
+        this.audioCtx = null;
 
         this.init();
       }
@@ -268,8 +663,68 @@
         this.animate();
       }
 
+      initAudio() {
+        if (this.audioCtx) return;
+        this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+
+      playAlert(type, count) {
+        if (type === 'none') return;
+        this.initAudio();
+        
+        const now = this.audioCtx.currentTime;
+        for (let i = 0; i < count; i++) {
+          const delay = i * 0.35;
+          if (type === 'bell') this.triggerBell(now + delay);
+          if (type === 'gong') this.triggerGong(now + delay);
+        }
+      }
+
+      triggerBell(time) {
+        const osc = this.audioCtx.createOscillator();
+        const gain = this.audioCtx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(2500, time);
+        
+        gain.gain.setValueAtTime(0, time);
+        gain.gain.linearRampToValueAtTime(0.3, time + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.01, time + 0.3);
+
+        osc.connect(gain);
+        gain.connect(this.audioCtx.destination);
+
+        osc.start(time);
+        osc.stop(time + 0.3);
+      }
+
+      triggerGong(time) {
+        // Multi-oscillator gong for complex metallic sound
+        const frequencies = [70, 112, 161, 230]; // Inharmonic
+        const masterGain = this.audioCtx.createGain();
+
+        frequencies.forEach((f, idx) => {
+          const osc = this.audioCtx.createOscillator();
+          const g = this.audioCtx.createGain();
+          
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(f, time);
+          
+          g.gain.setValueAtTime(0, time);
+          g.gain.linearRampToValueAtTime(0.2 / (idx + 1), time + 0.05);
+          g.gain.exponentialRampToValueAtTime(0.01, time + 3.0);
+          
+          osc.connect(g);
+          g.connect(masterGain);
+          osc.start(time);
+          osc.stop(time + 3.5);
+        });
+
+        masterGain.connect(this.audioCtx.destination);
+      }
+
       loadLocalStorage() {
-        const saved = localStorage.getItem('conf-timer-v7');
+        const saved = localStorage.getItem('conf-timer-v9');
         if (saved) {
           try { 
             const parsed = JSON.parse(saved);
@@ -279,7 +734,7 @@
       }
 
       saveLocalStorage() {
-        localStorage.setItem('conf-timer-v7', JSON.stringify(this.state));
+        localStorage.setItem('conf-timer-v9', JSON.stringify(this.state));
       }
 
       parseUrlParams() {
@@ -319,11 +774,130 @@
 
         window.onbeforeunload = () => this.saveLocalStorage();
         window.addEventListener('keydown', (e) => {
-          if (e.key === ' ' && document.activeElement !== this.input) {
+          if (e.key === ' ' && document.activeElement !== this.input && !this.isOverlayActive()) {
             e.preventDefault();
             this.togglePlayPause();
           }
+          if (e.key === 'Escape') this.closeSettings();
         });
+
+        document.getElementById('settings-overlay').onclick = () => this.closeSettings();
+      }
+
+      isOverlayActive() {
+        return document.getElementById('settings-overlay').style.display === 'flex';
+      }
+
+      openSettings() {
+        this.initAudio();
+        document.getElementById('settings-overlay').style.display = 'flex';
+        
+        document.getElementById('setting-start-time').value = this.formatInputTime(this.state.durationMs);
+        document.getElementById('setting-start-sound').value = this.state.startSound;
+        document.getElementById('setting-start-repeat').value = this.state.startRepeat;
+
+        document.getElementById('setting-yellow-time').value = this.formatInputTime(this.state.yellowMs);
+        document.getElementById('setting-yellow-sound').value = this.state.yellowSound;
+        document.getElementById('setting-yellow-repeat').value = this.state.yellowRepeat;
+
+        document.getElementById('setting-red-time').value = this.formatInputTime(this.state.redMs);
+        document.getElementById('setting-red-sound').value = this.state.redSound;
+        document.getElementById('setting-red-repeat').value = this.state.redRepeat;
+
+        this.updateSettingsUI();
+        this.validateSettings();
+      }
+
+      updateSettingsUI() {
+        ['start', 'yellow', 'red'].forEach(s => {
+          const sound = document.getElementById(`setting-${s}-sound`).value;
+          const disabled = (sound === 'none');
+          document.getElementById(`setting-${s}-repeat`).disabled = disabled;
+          // btn-test is handled by querySelector
+          const btn = document.querySelector(`button[onclick*="testAlert('${s}')"]`);
+          if (btn) btn.disabled = disabled;
+        });
+      }
+
+      validateSettings() {
+        const parse = (val) => {
+          const m = val.match(/(\d+):(\d+)/);
+          if (m) return (parseInt(m[1]) * 60 + parseInt(m[2])) * 1000;
+          return null;
+        };
+
+        const y = parse(document.getElementById('setting-yellow-time').value);
+        const r = parse(document.getElementById('setting-red-time').value);
+        const isValid = (y !== null && r !== null && y > r);
+
+        const yInput = document.getElementById('setting-yellow-time');
+        const rInput = document.getElementById('setting-red-time');
+        const saveBtn = document.getElementById('btn-save-settings');
+        const msg = document.getElementById('validation-msg');
+
+        if (!isValid && y !== null && r !== null) {
+          yInput.classList.add('error');
+          rInput.classList.add('error');
+          saveBtn.disabled = true;
+          msg.style.display = 'block';
+        } else {
+          yInput.classList.remove('error');
+          rInput.classList.remove('error');
+          saveBtn.disabled = false;
+          msg.style.display = 'none';
+        }
+      }
+
+      testAlert(stage) {
+        const sound = document.getElementById(`setting-${stage}-sound`).value;
+        const repeat = parseInt(document.getElementById(`setting-${stage}-repeat`).value);
+        this.playAlert(sound, repeat);
+      }
+
+      closeSettings() {
+        document.getElementById('settings-overlay').style.display = 'none';
+        this.updateUI();
+      }
+
+      saveSettings() {
+        const parse = (val) => {
+          const m = val.match(/(\d+):(\d+)/);
+          if (m) return (parseInt(m[1]) * 60 + parseInt(m[2])) * 1000;
+          return null;
+        };
+
+        const sTime = parse(document.getElementById('setting-start-time').value);
+        const yTime = parse(document.getElementById('setting-yellow-time').value);
+        const rTime = parse(document.getElementById('setting-red-time').value);
+
+        if (sTime !== null) {
+          this.state.durationMs = sTime;
+          if (this.state.isPaused && !this.state.isDirty) {
+            this.state.pausedRemainingMs = sTime;
+          }
+        }
+        if (yTime !== null) this.state.yellowMs = yTime;
+        if (rTime !== null) this.state.redMs = rTime;
+
+        this.state.startSound = document.getElementById('setting-start-sound').value;
+        this.state.startRepeat = parseInt(document.getElementById('setting-start-repeat').value);
+        
+        this.state.yellowSound = document.getElementById('setting-yellow-sound').value;
+        this.state.yellowRepeat = parseInt(document.getElementById('setting-yellow-repeat').value);
+
+        this.state.redSound = document.getElementById('setting-red-sound').value;
+        this.state.redRepeat = parseInt(document.getElementById('setting-red-repeat').value);
+
+        this.saveLocalStorage();
+        this.closeSettings();
+      }
+
+      toggleFullscreen() {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen();
+        } else if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
       }
 
       enterEditMode(e) {
@@ -390,6 +964,7 @@
         this.state.targetTimeMs = null;
         this.state.pausedRemainingMs = this.state.durationMs;
         this.state.isDirty = false;
+        this.lastAlertStage = null;
         this.updateUI();
       }
 
@@ -397,6 +972,10 @@
         if (this.state.isPaused) {
           this.state.targetTimeMs = Date.now() + this.state.pausedRemainingMs;
           this.state.isPaused = false;
+          // Trigger start sound if at the beginning and not dirty
+          if (!this.state.isDirty || this.state.pausedRemainingMs === this.state.durationMs) {
+            this.playAlert(this.state.startSound, this.state.startRepeat);
+          }
         } else {
           this.state.pausedRemainingMs = this.getRemaining();
           this.state.isPaused = true;
@@ -440,12 +1019,23 @@
         if (isOvertime) {
           this.display.classList.add('red');
           if (!this.state.isPaused) this.container.classList.add('flash-mode');
-        } else if (rem < 15000) {
+        } else if (rem < this.state.redMs) {
           this.display.classList.add('red');
-        } else if (rem < 60000) {
+          if (!this.state.isPaused && this.lastAlertStage !== 'red') {
+            this.playAlert(this.state.redSound, this.state.redRepeat);
+            this.lastAlertStage = 'red';
+          }
+        } else if (rem < this.state.yellowMs) {
           this.display.classList.add('yellow');
+          if (!this.state.isPaused && this.lastAlertStage !== 'yellow') {
+            this.playAlert(this.state.yellowSound, this.state.yellowRepeat);
+            this.lastAlertStage = 'yellow';
+          }
         } else {
           this.display.classList.add('white');
+          // Reset threshold if we go back (e.g. adjust time)
+          if (rem > this.state.yellowMs) this.lastAlertStage = null;
+          else if (rem > this.state.redMs && this.lastAlertStage === 'red') this.lastAlertStage = 'yellow';
         }
 
         const maskPct = Math.max(0, Math.min(100, (1 - Math.max(0, rem) / this.state.durationMs) * 100));
@@ -453,8 +1043,8 @@
 
         // Update proportional segments
         const totalMs = this.state.durationMs;
-        const redWidth = Math.min(100, (15000 / totalMs) * 100);
-        const yellowWidth = Math.min(100 - redWidth, (45000 / totalMs) * 100);
+        const redWidth = Math.min(100, (this.state.redMs / totalMs) * 100);
+        const yellowWidth = Math.min(100 - redWidth, ((this.state.yellowMs - this.state.redMs) / totalMs) * 100);
         const greenWidth = Math.max(0, 100 - redWidth - yellowWidth);
 
         this.segRed.style.width = redWidth + '%';
