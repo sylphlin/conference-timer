@@ -42,6 +42,33 @@
     .timer-text.yellow { color: var(--text-yellow); }
     .timer-text.red { color: var(--text-red); }
 
+    /* Timer Edit Mode Glow & Pulse */
+    .timer-edit-glow {
+      display: flex !important;
+      width: fit-content !important;
+      margin: 0 auto;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid rgba(255, 255, 255, 0.4) !important;
+      border-radius: 2.5rem;
+      padding: 0.1em 0.2em;
+      background: rgba(255, 255, 255, 0.03);
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+      animation: timer-edit-pulse 2.5s ease-in-out infinite;
+      transition: all 0.3s ease;
+    }
+
+    @keyframes timer-edit-pulse {
+      0%, 100% {
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.2), 0 0 30px rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.3);
+      }
+      50% {
+        box-shadow: 0 0 40px rgba(255, 255, 255, 0.6), 0 0 80px rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.8);
+      }
+    }
+
     /* UI Layout */
     @keyframes flash-overtime {
       0%, 49% { background-color: var(--text-red); color: var(--bg-black); }
@@ -82,13 +109,15 @@
       font-size: clamp(4rem, 21vw, 40rem);
       font-weight: 800;
       font-variant-numeric: tabular-nums;
-      line-height: 1.1;
+      line-height: 1;
       display: inline-block;
+      border: 2px solid transparent;
+      padding: 0.1em 0;
     }
 
     #timer-input-wrapper {
       display: none;
-      align-items: baseline;
+      align-items: center;
       justify-content: center;
       width: 100%;
     }
@@ -102,8 +131,9 @@
       font-family: inherit;
       text-align: center;
       outline: none;
-      width: 45%;
+      width: 2.1ch;
       padding: 0;
+      line-height: 1;
     }
 
     #timer-input-wrapper .timer-split-colon {
@@ -111,9 +141,12 @@
       font-size: clamp(4rem, 21vw, 40rem);
       font-weight: 800;
       font-family: inherit;
-      opacity: 0.5;
+      opacity: 1;
       pointer-events: none;
       user-select: none;
+      line-height: 1;
+      margin: 0 -0.05em;
+      transform: translateY(-0.06em); /* Visual compensation for colon alignment in flex-center */
     }
 
     /* Side Controls */
@@ -909,6 +942,7 @@
             const { mm, ss } = this.splitMs(remaining);
             this.inputMm.value = mm;
             this.inputSs.value = ss;
+            this.inputWrapper.classList.remove('timer-edit-glow');
             this.inputMm.blur();
             this.inputSs.blur();
           }
@@ -1071,6 +1105,7 @@
         
         this.display.style.display = 'none';
         this.inputWrapper.style.display = 'flex';
+        this.inputWrapper.classList.add('timer-edit-glow');
         this.inputMm.value = mm;
         this.inputSs.value = ss;
 
@@ -1092,6 +1127,7 @@
         this.state.isDirty = true;
         this.display.style.display = 'block';
         this.inputWrapper.style.display = 'none';
+        this.inputWrapper.classList.remove('timer-edit-glow');
         this.updateUI();
       }
 
