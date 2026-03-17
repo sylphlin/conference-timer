@@ -44,9 +44,14 @@
 
     /* Timer Edit Mode Glow & Pulse */
     .timer-edit-glow {
+      display: flex !important;
+      width: fit-content !important;
+      margin: 0 auto;
+      align-items: center;
+      justify-content: center;
       border: 2px solid rgba(255, 255, 255, 0.4) !important;
       border-radius: 2.5rem;
-      padding: clamp(1rem, 2vh, 2rem) clamp(2rem, 4vw, 4rem);
+      padding: 0.1em 0.2em;
       background: rgba(255, 255, 255, 0.03);
       box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
       animation: timer-edit-pulse 2.5s ease-in-out infinite;
@@ -57,12 +62,10 @@
       0%, 100% {
         box-shadow: 0 0 15px rgba(255, 255, 255, 0.2), 0 0 30px rgba(255, 255, 255, 0.1);
         border-color: rgba(255, 255, 255, 0.3);
-        transform: scale(1);
       }
       50% {
-        box-shadow: 0 0 30px rgba(255, 255, 255, 0.5), 0 0 60px rgba(255, 255, 255, 0.2);
-        border-color: rgba(255, 255, 255, 0.7);
-        transform: scale(1.01);
+        box-shadow: 0 0 40px rgba(255, 255, 255, 0.6), 0 0 80px rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.8);
       }
     }
 
@@ -106,13 +109,15 @@
       font-size: clamp(4rem, 21vw, 40rem);
       font-weight: 800;
       font-variant-numeric: tabular-nums;
-      line-height: 1.1;
+      line-height: 1;
       display: inline-block;
+      border: 2px solid transparent;
+      padding: 0.1em 0;
     }
 
     #timer-input-wrapper {
       display: none;
-      align-items: baseline;
+      align-items: center;
       justify-content: center;
       width: 100%;
     }
@@ -126,8 +131,9 @@
       font-family: inherit;
       text-align: center;
       outline: none;
-      width: 45%;
+      width: 2.1ch;
       padding: 0;
+      line-height: 1;
     }
 
     #timer-input-wrapper .timer-split-colon {
@@ -135,9 +141,12 @@
       font-size: clamp(4rem, 21vw, 40rem);
       font-weight: 800;
       font-family: inherit;
-      opacity: 0.5;
+      opacity: 1;
       pointer-events: none;
       user-select: none;
+      line-height: 1;
+      margin: 0 -0.05em;
+      transform: translateY(-0.06em); /* Visual compensation for colon alignment in flex-center */
     }
 
     /* Side Controls */
