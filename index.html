@@ -86,8 +86,14 @@
       display: inline-block;
     }
 
-    #timer-input {
+    #timer-input-wrapper {
       display: none;
+      align-items: baseline;
+      justify-content: center;
+      width: 100%;
+    }
+
+    #timer-input-wrapper .timer-split-input {
       background: transparent;
       border: none;
       color: var(--text-white);
@@ -95,8 +101,19 @@
       font-weight: 800;
       font-family: inherit;
       text-align: center;
-      width: 100%;
       outline: none;
+      width: 45%;
+      padding: 0;
+    }
+
+    #timer-input-wrapper .timer-split-colon {
+      color: var(--text-white);
+      font-size: clamp(4rem, 21vw, 40rem);
+      font-weight: 800;
+      font-family: inherit;
+      opacity: 0.5;
+      pointer-events: none;
+      user-select: none;
     }
 
     /* Side Controls */
@@ -275,7 +292,6 @@
     .settings-table th {
       text-align: left;
       font-size: 0.75rem;
-      text-transform: uppercase;
       letter-spacing: 0.05em;
       color: rgba(255, 255, 255, 0.4);
       padding-bottom: 1rem;
@@ -330,6 +346,44 @@
       transition: all 0.2s;
     }
 
+    .time-input-group {
+      display: flex;
+      align-items: center;
+      background: var(--input-bg);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 0.5rem;
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+
+    .time-input-group:focus-within {
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .time-input-group.error {
+      background-color: var(--input-error);
+      border-color: var(--text-red);
+    }
+
+    .time-input-group input {
+      background: transparent;
+      border: none;
+      color: var(--text-white);
+      font-size: 0.9rem;
+      font-family: inherit;
+      outline: none;
+      width: 50%;
+      text-align: center;
+      padding: 0.5rem 0;
+    }
+
+    .time-input-group .time-colon {
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 0.9rem;
+      pointer-events: none;
+      user-select: none;
+    }
+
     .settings-table select {
       cursor: pointer;
       appearance: none;
@@ -339,14 +393,28 @@
       padding-right: 24px;
     }
 
+    .settings-table select:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
     .settings-table input[type="text"]:focus,
     .settings-table select:focus {
       border-color: rgba(255, 255, 255, 0.3);
     }
 
+    .settings-table .time-input-group input:focus {
+      border-color: transparent;
+    }
+
     .settings-table input.error {
       background-color: var(--input-error);
       border-color: var(--text-red);
+    }
+
+    .settings-table .time-input-group input.error {
+      background-color: transparent;
+      border-color: transparent;
     }
 
     .btn-test {
@@ -456,7 +524,7 @@
         <thead>
           <tr>
             <th>Stage</th>
-            <th style="width: 80px;">Time</th>
+            <th style="width: 100px;">Time</th>
             <th>Alert Sound</th>
             <th style="width: 60px;">Repeat</th>
             <th style="width: 40px;">Test</th>
@@ -471,7 +539,13 @@
                 <span>Start</span>
               </div>
             </td>
-            <td><input type="text" id="setting-start-time" maxlength="5" placeholder="10:00"></td>
+            <td>
+              <div class="time-input-group">
+                <input type="text" id="setting-start-mm" maxlength="2" placeholder="10" onfocus="this.select()" oninput="timer.autoAdvanceTime(this, 'setting-start-ss')">
+                <span class="time-colon">:</span>
+                <input type="text" id="setting-start-ss" maxlength="2" placeholder="00" onfocus="this.select()">
+              </div>
+            </td>
             <td>
               <select id="setting-start-sound" onchange="timer.updateSettingsUI()">
                 <option value="none">N/A</option>
@@ -500,7 +574,13 @@
                 <span>Yellow</span>
               </div>
             </td>
-            <td><input type="text" id="setting-yellow-time" maxlength="5" placeholder="01:00" oninput="timer.validateSettings()"></td>
+            <td>
+              <div class="time-input-group" id="setting-yellow-time-group">
+                <input type="text" id="setting-yellow-mm" maxlength="2" placeholder="01" onfocus="this.select()" oninput="timer.autoAdvanceTime(this, 'setting-yellow-ss'); timer.validateSettings()">
+                <span class="time-colon">:</span>
+                <input type="text" id="setting-yellow-ss" maxlength="2" placeholder="00" onfocus="this.select()" oninput="timer.validateSettings()">
+              </div>
+            </td>
             <td>
               <select id="setting-yellow-sound" onchange="timer.updateSettingsUI()">
                 <option value="none">N/A</option>
@@ -529,7 +609,13 @@
                 <span>Red</span>
               </div>
             </td>
-            <td><input type="text" id="setting-red-time" maxlength="5" placeholder="00:15" oninput="timer.validateSettings()"></td>
+            <td>
+              <div class="time-input-group" id="setting-red-time-group">
+                <input type="text" id="setting-red-mm" maxlength="2" placeholder="00" onfocus="this.select()" oninput="timer.autoAdvanceTime(this, 'setting-red-ss'); timer.validateSettings()">
+                <span class="time-colon">:</span>
+                <input type="text" id="setting-red-ss" maxlength="2" placeholder="15" onfocus="this.select()" oninput="timer.validateSettings()">
+              </div>
+            </td>
             <td>
               <select id="setting-red-sound" onchange="timer.updateSettingsUI()">
                 <option value="none">N/A</option>
@@ -588,7 +674,11 @@
       <!-- Main Display -->
       <div id="display-wrapper">
         <div id="timer-display" class="timer-text white">10:00</div>
-        <input type="text" id="timer-input" placeholder="00:00" maxlength="5">
+        <div id="timer-input-wrapper">
+          <input type="text" class="timer-split-input" id="timer-input-mm" maxlength="2" placeholder="00" onfocus="this.select()">
+          <span class="timer-split-colon">:</span>
+          <input type="text" class="timer-split-input" id="timer-input-ss" maxlength="2" placeholder="00" onfocus="this.select()">
+        </div>
       </div>
 
       <!-- Right Controls: Start/Pause and Reset -->
@@ -618,7 +708,9 @@
       constructor() {
         this.container = document.body;
         this.display = document.getElementById('timer-display');
-        this.input = document.getElementById('timer-input');
+        this.inputWrapper = document.getElementById('timer-input-wrapper');
+        this.inputMm = document.getElementById('timer-input-mm');
+        this.inputSs = document.getElementById('timer-input-ss');
         this.mask = document.getElementById('progress-mask');
         this.iconPlay = document.getElementById('icon-play');
         this.iconPause = document.getElementById('icon-pause');
@@ -798,18 +890,42 @@
 
       bindEvents() {
         this.display.onclick = (e) => this.enterEditMode(e);
-        this.input.onblur = () => this.exitEditMode();
-        this.input.onkeydown = (e) => {
+
+        const handleTimerBlur = () => {
+          // Delay to check if focus moved to the other split input
+          setTimeout(() => {
+            if (document.activeElement !== this.inputMm && document.activeElement !== this.inputSs) {
+              this.exitEditMode();
+            }
+          }, 0);
+        };
+        this.inputMm.onblur = handleTimerBlur;
+        this.inputSs.onblur = handleTimerBlur;
+
+        const handleTimerKeydown = (e) => {
           if (e.key === 'Enter') this.exitEditMode();
           if (e.key === 'Escape') {
-            this.input.value = this.formatInputTime(this.getRemaining());
-            this.input.blur();
+            const remaining = this.getRemaining();
+            const { mm, ss } = this.splitMs(remaining);
+            this.inputMm.value = mm;
+            this.inputSs.value = ss;
+            this.inputMm.blur();
+            this.inputSs.blur();
+          }
+        };
+        this.inputMm.onkeydown = handleTimerKeydown;
+        this.inputSs.onkeydown = handleTimerKeydown;
+
+        // Auto-advance from MM to SS on the main timer
+        this.inputMm.oninput = () => {
+          if (this.inputMm.value.length >= 2) {
+            this.inputSs.focus();
           }
         };
 
         window.onbeforeunload = () => this.saveLocalStorage();
         window.addEventListener('keydown', (e) => {
-          if (e.key === ' ' && document.activeElement !== this.input && !this.isOverlayActive()) {
+          if (e.key === ' ' && document.activeElement !== this.inputMm && document.activeElement !== this.inputSs && !this.isOverlayActive()) {
             e.preventDefault();
             this.togglePlayPause();
           }
@@ -827,15 +943,21 @@
         this.initAudio();
         document.getElementById('settings-overlay').style.display = 'flex';
         
-        document.getElementById('setting-start-time').value = this.formatInputTime(this.state.durationMs);
+        const { mm: sMm, ss: sSs } = this.splitMs(this.state.durationMs);
+        document.getElementById('setting-start-mm').value = sMm;
+        document.getElementById('setting-start-ss').value = sSs;
         document.getElementById('setting-start-sound').value = this.state.startSound;
         document.getElementById('setting-start-repeat').value = this.state.startRepeat;
 
-        document.getElementById('setting-yellow-time').value = this.formatInputTime(this.state.yellowMs);
+        const { mm: yMm, ss: ySs } = this.splitMs(this.state.yellowMs);
+        document.getElementById('setting-yellow-mm').value = yMm;
+        document.getElementById('setting-yellow-ss').value = ySs;
         document.getElementById('setting-yellow-sound').value = this.state.yellowSound;
         document.getElementById('setting-yellow-repeat').value = this.state.yellowRepeat;
 
-        document.getElementById('setting-red-time').value = this.formatInputTime(this.state.redMs);
+        const { mm: rMm, ss: rSs } = this.splitMs(this.state.redMs);
+        document.getElementById('setting-red-mm').value = rMm;
+        document.getElementById('setting-red-ss').value = rSs;
         document.getElementById('setting-red-sound').value = this.state.redSound;
         document.getElementById('setting-red-repeat').value = this.state.redRepeat;
 
@@ -855,29 +977,30 @@
       }
 
       validateSettings() {
-        const parse = (val) => {
-          const m = val.match(/(\d+):(\d+)/);
-          if (m) return (parseInt(m[1]) * 60 + parseInt(m[2])) * 1000;
-          return null;
+        const readTime = (stage) => {
+          const mm = parseInt(document.getElementById(`setting-${stage}-mm`).value);
+          const ss = parseInt(document.getElementById(`setting-${stage}-ss`).value);
+          if (isNaN(mm) || isNaN(ss)) return null;
+          return (mm * 60 + ss) * 1000;
         };
 
-        const y = parse(document.getElementById('setting-yellow-time').value);
-        const r = parse(document.getElementById('setting-red-time').value);
+        const y = readTime('yellow');
+        const r = readTime('red');
         const isValid = (y !== null && r !== null && y > r);
 
-        const yInput = document.getElementById('setting-yellow-time');
-        const rInput = document.getElementById('setting-red-time');
+        const yGroup = document.getElementById('setting-yellow-time-group');
+        const rGroup = document.getElementById('setting-red-time-group');
         const saveBtn = document.getElementById('btn-save-settings');
         const msg = document.getElementById('validation-msg');
 
         if (!isValid && y !== null && r !== null) {
-          yInput.classList.add('error');
-          rInput.classList.add('error');
+          yGroup.classList.add('error');
+          rGroup.classList.add('error');
           saveBtn.disabled = true;
           msg.style.display = 'block';
         } else {
-          yInput.classList.remove('error');
-          rInput.classList.remove('error');
+          yGroup.classList.remove('error');
+          rGroup.classList.remove('error');
           saveBtn.disabled = false;
           msg.style.display = 'none';
         }
@@ -895,15 +1018,16 @@
       }
 
       saveSettings() {
-        const parse = (val) => {
-          const m = val.match(/(\d+):(\d+)/);
-          if (m) return (parseInt(m[1]) * 60 + parseInt(m[2])) * 1000;
-          return null;
+        const readTime = (stage) => {
+          const mm = parseInt(document.getElementById(`setting-${stage}-mm`).value);
+          const ss = parseInt(document.getElementById(`setting-${stage}-ss`).value);
+          if (isNaN(mm) || isNaN(ss)) return null;
+          return (mm * 60 + ss) * 1000;
         };
 
-        const sTime = parse(document.getElementById('setting-start-time').value);
-        const yTime = parse(document.getElementById('setting-yellow-time').value);
-        const rTime = parse(document.getElementById('setting-red-time').value);
+        const sTime = readTime('start');
+        const yTime = readTime('yellow');
+        const rTime = readTime('red');
 
         if (sTime !== null) {
           this.state.durationMs = sTime;
@@ -942,34 +1066,47 @@
         const clickX = e.clientX - rect.left;
         const width = rect.width;
         
+        const remaining = this.getRemaining();
+        const { mm, ss } = this.splitMs(remaining);
+        
         this.display.style.display = 'none';
-        this.input.style.display = 'block';
-        this.input.value = this.formatInputTime(this.getRemaining());
-        this.input.focus();
+        this.inputWrapper.style.display = 'flex';
+        this.inputMm.value = mm;
+        this.inputSs.value = ss;
 
         setTimeout(() => {
           if (clickX < width * 0.45) {
-            this.input.setSelectionRange(0, 2);
+            this.inputMm.focus();
           } else {
-            this.input.setSelectionRange(3, 5);
+            this.inputSs.focus();
           }
         }, 0);
       }
 
       exitEditMode() {
-        const val = this.input.value;
-        const match = val.match(/(\d+):(\d+)/) || val.match(/(\d\d)(\d\d)/);
-        if (match) {
-          const m = parseInt(match[1]);
-          const s = parseInt(match[2]);
-          this.state.durationMs = Math.min(this.limitMs, (m * 60 + s) * 1000);
-          this.state.pausedRemainingMs = this.state.durationMs;
-          this.state.targetTimeMs = null;
-          this.state.isDirty = true;
-        }
+        const m = parseInt(this.inputMm.value) || 0;
+        const s = parseInt(this.inputSs.value) || 0;
+        this.state.durationMs = Math.min(this.limitMs, (m * 60 + s) * 1000);
+        this.state.pausedRemainingMs = this.state.durationMs;
+        this.state.targetTimeMs = null;
+        this.state.isDirty = true;
         this.display.style.display = 'block';
-        this.input.style.display = 'none';
+        this.inputWrapper.style.display = 'none';
         this.updateUI();
+      }
+
+      splitMs(ms) {
+        const absMs = Math.max(0, ms);
+        const totalSecs = Math.floor(absMs / 1000);
+        const m = Math.floor(totalSecs / 60);
+        const s = totalSecs % 60;
+        return { mm: String(m).padStart(2, '0'), ss: String(s).padStart(2, '0') };
+      }
+
+      autoAdvanceTime(input, nextId) {
+        if (input.value.length >= 2) {
+          document.getElementById(nextId).focus();
+        }
       }
 
       getRemaining() {
