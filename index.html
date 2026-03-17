@@ -933,6 +933,7 @@
             const { mm, ss } = this.splitMs(remaining);
             this.inputMm.value = mm;
             this.inputSs.value = ss;
+            this.inputWrapper.classList.remove('timer-edit-glow');
             this.inputMm.blur();
             this.inputSs.blur();
           }
@@ -1095,6 +1096,7 @@
         
         this.display.style.display = 'none';
         this.inputWrapper.style.display = 'flex';
+        this.inputWrapper.classList.add('timer-edit-glow');
         this.inputMm.value = mm;
         this.inputSs.value = ss;
 
@@ -1116,6 +1118,7 @@
         this.state.isDirty = true;
         this.display.style.display = 'block';
         this.inputWrapper.style.display = 'none';
+        this.inputWrapper.classList.remove('timer-edit-glow');
         this.updateUI();
       }
 
