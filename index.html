@@ -42,6 +42,30 @@
     .timer-text.yellow { color: var(--text-yellow); }
     .timer-text.red { color: var(--text-red); }
 
+    /* Timer Edit Mode Glow & Pulse */
+    .timer-edit-glow {
+      border: 2px solid rgba(255, 255, 255, 0.4) !important;
+      border-radius: 2.5rem;
+      padding: clamp(1rem, 2vh, 2rem) clamp(2rem, 4vw, 4rem);
+      background: rgba(255, 255, 255, 0.03);
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+      animation: timer-edit-pulse 2.5s ease-in-out infinite;
+      transition: all 0.3s ease;
+    }
+
+    @keyframes timer-edit-pulse {
+      0%, 100% {
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.2), 0 0 30px rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.3);
+        transform: scale(1);
+      }
+      50% {
+        box-shadow: 0 0 30px rgba(255, 255, 255, 0.5), 0 0 60px rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.7);
+        transform: scale(1.01);
+      }
+    }
+
     /* UI Layout */
     @keyframes flash-overtime {
       0%, 49% { background-color: var(--text-red); color: var(--bg-black); }
