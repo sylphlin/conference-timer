@@ -37,6 +37,11 @@ The timer digits MUST use a massive, high-contrast font that adapts to the scree
 The user MUST be able to click directly on the timer digits to edit the duration.
 - **Interaction**: Clicking triggers an input field.
 - **Validation**: Supports `MM:SS` format and caps duration at `99:99`.
+- **Visual Feedback (Edit Mode)**:
+  - When editing, a neon white breathing glow frame MUST appear around the input area.
+  - The frame MUST have a significant border-radius (`2.5rem`) and a subtle pulsing animation (`timer-edit-pulse`).
+  - The digits and colon MUST remain centered and aligned with their non-editing positions to prevent layout shifts.
+  - The breathing effect MUST be limited to the glow and border-color brightness, keeping the text and frame dimensions static.
 
 ### Requirement: Professional Settings Modal
 A dedicated settings modal MUST be available via a gear icon to configure advanced behaviors:
