@@ -678,7 +678,25 @@
               </div>
             </td>
             <td><div style="font-size: 0.9rem; color: rgba(255,255,255,0.4); padding-left: 0.5rem;">00:00</div></td>
-            <td colspan="3" style="text-align: center; color: rgba(255,255,255,0.2); font-size: 0.8rem; font-style: italic;">No sound options</td>
+            <td>
+              <select id="setting-timeout-sound" onchange="timer.updateSettingsUI()">
+                <option value="none">N/A</option>
+                <option value="bell">Call Bell</option>
+                <option value="gong">Gong</option>
+              </select>
+            </td>
+            <td>
+              <select id="setting-timeout-repeat">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+              </select>
+            </td>
+            <td>
+              <button class="btn-test" onclick="timer.testAlert('timeout')" aria-label="Test Sound">
+                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              </button>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -762,18 +780,21 @@
           isDirty: false,
           
           yellowMs: 60000,
-          yellowSound: 'none',
+          yellowSound: 'bell',
           yellowRepeat: 1,
           
           redMs: 15000,
-          redSound: 'none',
-          redRepeat: 1,
+          redSound: 'bell',
+          redRepeat: 2,
           
           startSound: 'none',
-          startRepeat: 1
+          startRepeat: 1,
+
+          timeoutSound: 'gong',
+          timeoutRepeat: 1
         };
 
-        this.lastAlertStage = null; // null, 'yellow', 'red'
+        this.lastAlertStage = null; // null, 'yellow', 'red', 'timeout'
         this.audioCtx = null;
 
         this.init();
@@ -995,12 +1016,15 @@
         document.getElementById('setting-red-sound').value = this.state.redSound;
         document.getElementById('setting-red-repeat').value = this.state.redRepeat;
 
+        document.getElementById('setting-timeout-sound').value = this.state.timeoutSound;
+        document.getElementById('setting-timeout-repeat').value = this.state.timeoutRepeat;
+
         this.updateSettingsUI();
         this.validateSettings();
       }
 
       updateSettingsUI() {
-        ['start', 'yellow', 'red'].forEach(s => {
+        ['start', 'yellow', 'red', 'timeout'].forEach(s => {
           const sound = document.getElementById(`setting-${s}-sound`).value;
           const disabled = (sound === 'none');
           document.getElementById(`setting-${s}-repeat`).disabled = disabled;
@@ -1080,6 +1104,9 @@
 
         this.state.redSound = document.getElementById('setting-red-sound').value;
         this.state.redRepeat = parseInt(document.getElementById('setting-red-repeat').value);
+
+        this.state.timeoutSound = document.getElementById('setting-timeout-sound').value;
+        this.state.timeoutRepeat = parseInt(document.getElementById('setting-timeout-repeat').value);
 
         this.saveLocalStorage();
         this.closeSettings();
@@ -1226,6 +1253,10 @@
 
         if (isOvertime) {
           this.display.classList.add('red');
+          if (!this.state.isPaused && this.lastAlertStage !== 'timeout') {
+            this.playAlert(this.state.timeoutSound, this.state.timeoutRepeat);
+            this.lastAlertStage = 'timeout';
+          }
           if (!this.state.isPaused) this.container.classList.add('flash-mode');
         } else if (rem < this.state.redMs) {
           this.display.classList.add('red');
