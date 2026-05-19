@@ -105,6 +105,22 @@
       min-width: 0;
     }
 
+    #timer-title {
+      display: none;
+      position: absolute;
+      top: 2rem;
+      left: 2rem;
+      height: clamp(28px, 4.5vh, 44px);
+      max-width: min(55vw, 900px);
+      color: var(--text-white);
+      font-size: clamp(1rem, 2.5vh, 1.5rem);
+      font-weight: 700;
+      line-height: 1.1;
+      overflow-wrap: anywhere;
+      align-items: center;
+      z-index: 100;
+    }
+
     #timer-display {
       font-size: clamp(4rem, 21vw, 40rem);
       font-weight: 800;
@@ -379,6 +395,35 @@
       transition: all 0.2s;
     }
 
+    .settings-title-row {
+      margin-bottom: 1.5rem;
+    }
+
+    .settings-title-row label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .settings-title-row input {
+      background: var(--input-bg);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 0.5rem;
+      color: var(--text-white);
+      font-family: inherit;
+      font-size: 1rem;
+      outline: none;
+      padding: 0.75rem;
+      transition: all 0.2s;
+      width: 100%;
+    }
+
+    .settings-title-row input:focus {
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
     .time-input-group {
       display: flex;
       align-items: center;
@@ -523,6 +568,12 @@
     }
 
     @media (max-width: 900px) {
+      #timer-title {
+        top: 1rem;
+        left: 1rem;
+        max-width: calc(100vw - 8rem);
+      }
+
       .top-right-controls {
         top: 1rem;
         right: 1rem;
@@ -540,6 +591,8 @@
 
 
 
+  <div id="timer-title"></div>
+
   <div class="top-right-controls">
     <button id="btn-settings" onclick="timer.openSettings()" aria-label="Settings" title="Settings">
       <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
@@ -550,8 +603,13 @@
   </div>
 
   <div id="settings-overlay">
-    <div id="settings-modal" onclick="event.stopPropagation()">
+    <div id="settings-modal">
       <h2>Settings</h2>
+
+      <div class="settings-title-row">
+        <label for="setting-title">Title</label>
+        <input type="text" id="setting-title" placeholder="Company or topic" maxlength="80">
+      </div>
       
       <table class="settings-table">
         <thead>
@@ -758,6 +816,7 @@
     class ConferenceTimer {
       constructor() {
         this.container = document.body;
+        this.titleDisplay = document.getElementById('timer-title');
         this.display = document.getElementById('timer-display');
         this.inputWrapper = document.getElementById('timer-input-wrapper');
         this.inputMm = document.getElementById('timer-input-mm');
@@ -773,6 +832,7 @@
         this.limitMs = (99 * 60 + 99) * 1000;
         this.defaultDurationMs = 10 * 60 * 1000;
         this.state = {
+          title: '',
           durationMs: this.defaultDurationMs,
           targetTimeMs: null,
           isPaused: true,
@@ -904,8 +964,22 @@
         });
       }
 
+      safeGetLocalStorage(key) {
+        try {
+          return window.localStorage.getItem(key);
+        } catch(e) {
+          return null;
+        }
+      }
+
+      safeSetLocalStorage(key, value) {
+        try {
+          window.localStorage.setItem(key, value);
+        } catch(e) {}
+      }
+
       loadLocalStorage() {
-        const saved = localStorage.getItem('conf-timer-v9');
+        const saved = this.safeGetLocalStorage('conf-timer-v9');
         if (saved) {
           try { 
             const parsed = JSON.parse(saved);
@@ -915,7 +989,7 @@
       }
 
       saveLocalStorage() {
-        localStorage.setItem('conf-timer-v9', JSON.stringify(this.state));
+        this.safeSetLocalStorage('conf-timer-v9', JSON.stringify(this.state));
       }
 
       parseUrlParams() {
@@ -980,6 +1054,12 @@
 
         window.onbeforeunload = () => this.saveLocalStorage();
         window.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' && this.isOverlayActive()) {
+            e.preventDefault();
+            const saveBtn = document.getElementById('btn-save-settings');
+            if (!saveBtn.disabled) this.saveSettings();
+            return;
+          }
           if (e.key === ' ' && document.activeElement !== this.inputMm && document.activeElement !== this.inputSs && !this.isOverlayActive()) {
             e.preventDefault();
             this.togglePlayPause();
@@ -987,7 +1067,11 @@
           if (e.key === 'Escape') this.closeSettings();
         });
 
-        document.getElementById('settings-overlay').onclick = () => this.closeSettings();
+        const settingsOverlay = document.getElementById('settings-overlay');
+        const settingsModal = document.getElementById('settings-modal');
+        settingsOverlay.addEventListener('mousedown', () => this.closeSettings());
+        settingsModal.addEventListener('mousedown', (e) => e.stopPropagation());
+        settingsModal.addEventListener('click', (e) => e.stopPropagation());
       }
 
       isOverlayActive() {
@@ -997,6 +1081,7 @@
       openSettings() {
         this.initAudio();
         document.getElementById('settings-overlay').style.display = 'flex';
+        document.getElementById('setting-title').value = this.state.title;
         
         const { mm: sMm, ss: sSs } = this.splitMs(this.state.durationMs);
         document.getElementById('setting-start-mm').value = sMm;
@@ -1082,6 +1167,8 @@
           if (isNaN(mm) || isNaN(ss)) return null;
           return (mm * 60 + ss) * 1000;
         };
+
+        this.state.title = document.getElementById('setting-title').value.trim();
 
         const sTime = readTime('start');
         const yTime = readTime('yellow');
@@ -1240,6 +1327,8 @@
 
       updateUI() {
         const rem = this.getRemaining();
+        this.titleDisplay.innerText = this.state.title;
+        this.titleDisplay.style.display = this.state.title ? 'flex' : 'none';
         this.display.innerText = this.formatTime(rem);
         
         // Button Logic
