@@ -4,6 +4,8 @@ import { readFileSync } from 'node:fs';
 const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 
 const requiredSnippets = [
+  'https://www.googletagmanager.com/gtag/js?id=G-K9NR3V94RC',
+  "gtag('config', 'G-K9NR3V94RC')",
   "title: ''",
   'id="timer-title"',
   'id="setting-title"',
